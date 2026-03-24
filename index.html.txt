@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شحن ببجي - موقعك</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Tahoma', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(12px);
+            padding: 35px 30px;
+            border-radius: 28px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #ffd966;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .sub {
+            text-align: center;
+            font-size: 13px;
+            color: #ccc;
+            margin-bottom: 30px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 14px 16px;
+            margin: 12px 0;
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+        input, select {
+            background: rgba(255,255,255,0.12);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #ffd966;
+            background: rgba(255,255,255,0.18);
+        }
+        input::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+        select option {
+            background: #1e1a3a;
+            color: white;
+        }
+        button {
+            background: #ffd966;
+            color: #1e1a2f;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        button:hover {
+            background: #ffcd3c;
+            transform: scale(1.01);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .note {
+            font-size: 11px;
+            text-align: center;
+            margin-top: 25px;
+            opacity: 0.7;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 18px;
+        }
+        .products-list {
+            margin: 15px 0 5px;
+            font-size: 12px;
+            text-align: center;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 شحن ببجي</h1>
+        <div class="sub">PUBG Mobile UC充值</div>
+        
+        <form id="orderForm">
+            <input type="text" id="userId" placeholder="📱 أدخل ID اللاعب" required>
+            <select id="product" required>
+                <option value="" disabled selected>🔽 اختر كمية UC</option>
+                <option value="60">⚡ 60 UC - 60 جنيه</option>
+                <option value="125">⚡ 125 UC - 120 جنيه</option>
+                <option value="300">⚡ 300 UC - 280 جنيه</option>
+                <option value="600">⚡ 600 UC - 550 جنيه</option>
+                <option value="1250">⚡ 1250 UC - 1100 جنيه</option>
+            </select>
+            <button type="submit">💳 ادفع الآن</button>
+        </form>
+        <div class="products-list">
+            🚀 شحن فوري بعد الدفع مباشرة
+        </div>
+        <div class="note">
+            ✅ بعد إتمام الدفع، سيتم إضافة الرصيد تلقائياً خلال دقيقة
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('orderForm').onsubmit = async function(e) {
+            e.preventDefault();
+            
+            const userId = document.getElementById('userId').value.trim();
+            const productAmount = document.getElementById('product').value;
+            
+            if (!userId) {
+                alert('❌ من فضلك أدخل ID اللاعب');
+                return;
+            }
+            if (!productAmount) {
+                alert('❌ من فضلك اختر المنتج');
+                return;
+            }
+            
+            const button = document.querySelector('button');
+            const originalText = button.textContent;
+            button.textContent = '⏳ جاري التحويل ...';
+            button.disabled = true;
+            
+            try {
+                const response = await fetch('/create-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, productAmount })
+                });
+                
+                const data = await response.json();
+                
+                if (data.paymentUrl) {
+                    window.location.href = data.paymentUrl;
+                } else {
+                    alert('❌ حدث خطأ: ' + (data.error || 'حاول مرة أخرى'));
+                    button.textContent = originalText;
+                    button.disabled = false;
+                }
+            } catch (error) {
+                console.error(error);
+                alert('❌ خطأ في الاتصال بالخادم، حاول مرة أخرى');
+                button.textContent = originalText;
+                button.disabled = false;
+            }
+        };
+    </script>
+</body>
+</html>
